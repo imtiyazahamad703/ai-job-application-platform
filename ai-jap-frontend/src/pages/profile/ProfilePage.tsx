@@ -36,7 +36,8 @@ export function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put('/profile', profile);
+      const { completionScore, _id, userId, createdAt, updatedAt, __v, ...dataToSend } = profile as any;
+      await api.put('/profile', dataToSend);
       // Show success toast here
     } catch (err) {
       console.error(err);
