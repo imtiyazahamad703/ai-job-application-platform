@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PlaywrightService } from '../../playwright/playwright.service';
-import { Job } from '../../../jobs/schemas/job.schema';
+import { Job } from '../../../modules/jobs/schemas/job.schema';
 
 @Injectable()
 export class LinkedinService {
@@ -8,14 +8,33 @@ export class LinkedinService {
 
   constructor(private readonly playwrightService: PlaywrightService) {}
 
-  async searchJobs(keyword: string, location: string = 'Worldwide'): Promise<Partial<Job>[]> {
-    this.logger.log(`Searching LinkedIn for: ${keyword} in ${location}`);
+  async searchJobs(
+    keyword: string, 
+    locations: string[] = ['Worldwide'],
+    workMode: string[] = [],
+    employmentType: string[] = []
+  ): Promise<Partial<Job>[]> {
+    const location = locations.length > 0 ? locations[0] : 'Worldwide';
+    this.logger.log(`Searching LinkedIn for: ${keyword} in ${location} with modes: ${workMode.join(',')}`);
     
     const page = await this.playwrightService.getNewPage();
     const jobs: Partial<Job>[] = [];
     
     try {
-      const url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+      // Basic LinkedIn URL construction
+      let url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+      
+      // Map workMode to LinkedIn filter (f_WT)
+      // 1: Onsite, 2: Remote, 3: Hybrid
+      const wtFilters: string[] = [];
+      if (workMode.includes('Onsite')) wtFilters.push('1');
+      if (workMode.includes('Remote')) wtFilters.push('2');
+      if (workMode.includes('Hybrid')) wtFilters.push('3');
+      
+      if (wtFilters.length > 0) {
+        url += `&f_WT=${encodeURIComponent(wtFilters.join(','))}`;
+      }
+
       await page.goto(url, { waitUntil: 'domcontentloaded' });
       
       // Basic scraping of public LinkedIn job search

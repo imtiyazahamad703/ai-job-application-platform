@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
@@ -18,6 +19,7 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { PlaywrightModule } from './automation/playwright/playwright.module';
 import { PlatformsModule } from './automation/platforms/platforms.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     PlaywrightModule,
     PlatformsModule,
     SchedulerModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [
