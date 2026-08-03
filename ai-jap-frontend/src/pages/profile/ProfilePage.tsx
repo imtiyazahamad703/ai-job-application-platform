@@ -18,7 +18,7 @@ export function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await api.get('/profile');
-        if (res.data) setProfile(res.data);
+        if (res.data?.profile) setProfile(res.data.profile);
       } catch (err) {
         console.error(err);
       } finally {
