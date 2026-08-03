@@ -12,6 +12,7 @@ export function ProfilePage() {
     headline: '',
     linkedinUrl: '',
     githubUrl: '',
+    skills: [] as string[],
   });
 
   useEffect(() => {
@@ -29,7 +30,13 @@ export function ProfilePage() {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === 'skills') {
+      const skillsArray = value.split(',').map(s => s.trim());
+      setProfile(prev => ({ ...prev, [name]: skillsArray }));
+    } else {
+      setProfile(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +85,10 @@ export function ProfilePage() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Professional Headline</label>
               <input type="text" name="headline" value={profile.headline || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="Senior Software Engineer" />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">Skills (Comma separated)</label>
+              <input type="text" name="skills" value={profile.skills?.join(', ') || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="React, Node.js, Python, AWS" />
             </div>
           </div>
         </div>
