@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Put, Body, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
-import { UpdateJobSearchPreferenceDto } from './dto/update-job-search-preference.dto';
+import { CreateSearchPersonaDto, UpdateSearchPersonaDto } from './dto/search-persona.dto';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { UserDocument } from '../authentication/schemas/user.schema';
@@ -13,32 +13,48 @@ import type { UserDocument } from '../authentication/schemas/user.schema';
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
-  @Get('preferences')
-  @ApiOperation({ summary: 'Get Job Search Preferences' })
-  async getPreferences(@CurrentUser() user: UserDocument) {
-    return this.jobsService.getPreferences(user._id.toString());
+  @Get('personas')
+  @ApiOperation({ summary: 'Get Search Personas' })
+  async getPersonas(@CurrentUser() user: UserDocument) {
+    return this.jobsService.getPersonas(user._id.toString());
   }
 
-  @Put('preferences')
-  @ApiOperation({ summary: 'Update Job Search Preferences' })
-  @ApiBody({ type: UpdateJobSearchPreferenceDto })
-  async updatePreferences(@CurrentUser() user: UserDocument, @Body() dto: UpdateJobSearchPreferenceDto) {
-    return this.jobsService.updatePreferences(user._id.toString(), dto);
+  @Post('personas')
+  @ApiOperation({ summary: 'Create Search Persona' })
+  @ApiBody({ type: CreateSearchPersonaDto })
+  async createPersona(@CurrentUser() user: UserDocument, @Body() dto: CreateSearchPersonaDto) {
+    return this.jobsService.createPersona(user._id.toString(), dto);
+  }
+
+  @Put('personas/:id')
+  @ApiOperation({ summary: 'Update Search Persona (Versioning)' })
+  @ApiBody({ type: UpdateSearchPersonaDto })
+  async updatePersona(@CurrentUser() user: UserDocument, @Param('id') id: string, @Body() dto: UpdateSearchPersonaDto) {
+    return this.jobsService.updatePersona(user._id.toString(), id, dto);
+  }
+
+  @Delete('personas/:id')
+  @ApiOperation({ summary: 'Delete/Deactivate Search Persona' })
+  async deletePersona(@CurrentUser() user: UserDocument, @Param('id') id: string) {
+    return this.jobsService.deletePersona(user._id.toString(), id);
   }
 
   @Get()
   @ApiOperation({ summary: 'List fetched jobs' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'skip', required: false, type: Number })
+  @ApiQuery({ name: 'location', required: false, type: String })
   async getJobs(
     @Query('limit') limit?: number,
     @Query('skip') skip?: number,
+    @Query('location') location?: string,
   ) {
-    const jobs = await this.jobsService.getJobs(
+    const { jobs, totalCount } = await this.jobsService.getJobs(
       limit ? parseInt(limit.toString()) : 20,
       skip ? parseInt(skip.toString()) : 0,
+      location
     );
-    return { jobs };
+    return { jobs, totalCount };
   }
 
   @Post('search')

@@ -16,59 +16,57 @@ export class GeminiService {
     }
   }
 
-  async filterRelevantJobs(
-    desiredTitles: string[],
-    keywords: string[],
-    scrapedJobs: any[]
-  ): Promise<any[]> {
-    if (!this.ai || scrapedJobs.length === 0) {
-      // If AI is not configured or no jobs to filter, return all jobs (fail open)
-      return scrapedJobs;
+  async evaluateJobSemantically(
+    jobDescription: string,
+    personaSummary: string,
+    mandatoryTech: string[],
+    preferredTech: string[]
+  ): Promise<{ score: number, reason: string }> {
+    if (!this.ai) {
+      return { score: 50, reason: 'AI disabled, assuming borderline pass.' }; // Default fail open
     }
 
     try {
-      this.logger.log(`Evaluating ${scrapedJobs.length} jobs with Gemini...`);
-
       const prompt = `
-You are an expert technical recruiter and AI job filter.
-I am a candidate looking for a job.
-My desired job titles are: ${desiredTitles.join(', ')}.
-My preferred keywords are: ${keywords.join(', ')}.
+You are an expert technical recruiter AI evaluating a job description against a candidate's profile.
 
-I will provide you with a JSON list of jobs scraped from the web.
-Evaluate each job title and company to determine if it is relevant to my desired titles.
-A job is relevant if its title semantically matches the intent of my desired titles. 
-For example, if my desired title is "React Developer", a job titled "Frontend Engineer" is relevant, but "Sales Executive" is not.
+Candidate Profile Summary:
+${personaSummary || 'Experienced Software Engineer'}
 
-Return ONLY a JSON array of boolean values corresponding to the relevance of each job in the exact same order.
-DO NOT return markdown, DO NOT return explanations, just the JSON array of booleans (e.g. [true, false, true]).
+The candidate's mandatory technologies: ${mandatoryTech.join(', ')}
+The candidate's preferred technologies: ${preferredTech.join(', ')}
 
-Jobs to evaluate:
-${JSON.stringify(scrapedJobs.map((j, i) => ({ index: i, title: j.title, company: j.company })), null, 2)}
+Job Description:
+${jobDescription.substring(0, 5000)} // Truncated to save tokens if massive
+
+Task:
+Evaluate how well the nature and context of this job aligns with the candidate's profile and tech stack.
+Are they an AI backend engineer, but the job is purely Python data science? Score it low.
+Does the job focus heavily on their preferred stack in the right context? Score it high.
+
+Return a JSON object strictly following this structure (NO MARKDOWN, NO OTHER TEXT):
+{
+  "score": number, // 0 to 100 based on semantic fit
+  "reason": string // 1-2 sentence explanation of why it fits or doesn't fit
+}
 `;
 
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
       });
 
-      const text = response.text || '[]';
-      // Clean up potential markdown formatting if the model disobeys
+      const text = response.text || '{}';
       const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const results: boolean[] = JSON.parse(cleanedText);
+      const result = JSON.parse(cleanedText);
 
-      if (results.length !== scrapedJobs.length) {
-        this.logger.warn('Gemini returned an mismatched array length. Failing open.');
-        return scrapedJobs;
-      }
-
-      const relevantJobs = scrapedJobs.filter((_, index) => results[index] === true);
-      this.logger.log(`Gemini filtered out ${scrapedJobs.length - relevantJobs.length} irrelevant jobs. Keeping ${relevantJobs.length}.`);
-      return relevantJobs;
-
+      return {
+        score: result.score || 0,
+        reason: result.reason || 'No reasoning provided.'
+      };
     } catch (error) {
-      this.logger.error('Failed to filter jobs with Gemini', error);
-      return scrapedJobs; // Fail open
+      this.logger.error('Failed to evaluate job with Gemini', error);
+      return { score: 50, reason: 'AI evaluation failed.' };
     }
   }
 }
