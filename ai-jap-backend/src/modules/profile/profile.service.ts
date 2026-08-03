@@ -26,6 +26,10 @@ export class ProfileService {
     return profile;
   }
 
+  async getAllProfiles(): Promise<ProfileDocument[]> {
+    return this.profileModel.find().exec();
+  }
+
   async updateProfile(
     userId: string,
     dto: UpdateProfileDto,

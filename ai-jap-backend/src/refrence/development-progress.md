@@ -452,9 +452,9 @@ src/
 
 | Collection | Purpose | Status |
 |------------|---------|--------|
-| users | Login credentials | PENDING |
-| profiles | Professional information | PENDING |
-| resumes | Resume metadata + Drive URLs | PENDING |
+| users | Login credentials | DONE |
+| profiles | Professional information | DONE |
+| resumes | Resume metadata + Drive URLs | DONE |
 | jobs | Fetched job listings | PENDING |
 | applications | Applied job records + status | PENDING |
 | automation_workflows | Successful browser workflows | PENDING |
@@ -497,21 +497,25 @@ src/
 
 | Date | Commit Message | Description |
 |------|----------------|-------------|
-| - | No commits yet | - |
+| 2026-08-03 | feat(backend): init nestjs, mongo, winston | Initial backend setup |
+| 2026-08-03 | feat(backend): implement auth, profile, resume | Core modules and API |
+| 2026-08-03 | feat(frontend): basic auth and routing | Frontend UI setup |
+| 2026-08-03 | feat(backend): implement google oauth 2.0 and migrate drive service | Google Auth & Drive |
+| 2026-08-03 | feat(frontend): add google sign-in and sign-up buttons | Google OAuth UI |
+| 2026-08-03 | fix(frontend): use createdAt for resume uploaded date | UI bugfix |
+| 2026-08-03 | fix(frontend): correctly parse profile response data | Profile bugfix |
 
 ---
 
 ## NEXT IMMEDIATE TASK
 
-**Start Phase 1 - Backend Foundation:**
+**Start Phase 2 - Job Search Module:**
 
-1. Wire main.ts properly (CORS, Helmet, Compression, Swagger, ValidationPipe)
-2. Create config/ module with Joi-validated environment variables
-3. Create database/ module for MongoDB connection
-4. Setup Winston logger in common/logger/
-5. Create global exception filter in common/filters/
-6. Setup health check endpoint
-7. Begin Authentication module
+1. Create Job schema (MongoDB/Mongoose)
+2. Create Playwright Job Scraper Service (LinkedIn, Greenhouse, Lever, etc.)
+3. Implement `GET /jobs` and `POST /jobs/search` APIs
+4. Create Frontend Jobs listing page
+5. Set up Scheduler for daily auto job search
 
 ---
 

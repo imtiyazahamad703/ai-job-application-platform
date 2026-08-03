@@ -14,6 +14,10 @@ import { ResumeModule } from './modules/resume/resume.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './modules/authentication/guards/jwt-auth.guard';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { PlaywrightModule } from './automation/playwright/playwright.module';
+import { PlatformsModule } from './automation/platforms/platforms.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -22,12 +26,17 @@ import { JwtAuthGuard } from './modules/authentication/guards/jwt-auth.guard';
     DatabaseModule, // MongoDB/Mongoose connection
     LoggerModule, // Winston logger (global)
     GoogleDriveModule, // Google Drive service (global)
+    ScheduleModule.forRoot(),
 
     // ─── Feature Modules ─────────────────────────────────────────────────
     HealthModule,
     AuthModule,
     ProfileModule,
     ResumeModule,
+    JobsModule,
+    PlaywrightModule,
+    PlatformsModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [
