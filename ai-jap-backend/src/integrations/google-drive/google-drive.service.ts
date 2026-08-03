@@ -56,6 +56,11 @@ export class GoogleDriveService {
       const fileName = `${baseName}_${timestamp}${ext}`;
 
       const requestBody: drive_v3.Schema$File = { name: fileName };
+      
+      const folderId = this.configService.get<string>('GOOGLE_DRIVE_FOLDER_ID');
+      if (folderId) {
+        requestBody.parents = [folderId];
+      }
 
       // Upload the file
       const uploadResponse = await drive.files.create({
