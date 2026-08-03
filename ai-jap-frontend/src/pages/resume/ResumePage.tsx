@@ -7,7 +7,7 @@ interface Resume {
   originalFilename: string;
   label: string;
   isDefault: boolean;
-  uploadedAt: string;
+  createdAt: string;
 }
 
 export function ResumePage() {
@@ -131,7 +131,7 @@ export function ResumePage() {
                         </span>
                       )}
                     </h4>
-                    <p className="text-sm text-muted-foreground mt-1">Uploaded on {new Date(resume.uploadedAt).toLocaleDateString()}</p>
+                    <p className="text-sm text-muted-foreground mt-1">Uploaded on {new Date(resume.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
