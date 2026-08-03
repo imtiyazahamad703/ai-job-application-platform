@@ -64,19 +64,19 @@ export function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">First Name</label>
-              <input type="text" name="firstName" value={profile.firstName || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="John" />
+              <input type="text" name="firstName" value={profile.firstName || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="John" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Last Name</label>
-              <input type="text" name="lastName" value={profile.lastName || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="Doe" />
+              <input type="text" name="lastName" value={profile.lastName || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="Doe" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
-              <input type="tel" name="phone" value={profile.phone || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="+1 (555) 000-0000" />
+              <input type="tel" name="phone" value={profile.phone || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="+1 (555) 000-0000" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Professional Headline</label>
-              <input type="text" name="headline" value={profile.headline || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="Senior Software Engineer" />
+              <input type="text" name="headline" value={profile.headline || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="Senior Software Engineer" />
             </div>
           </div>
         </div>
@@ -86,11 +86,11 @@ export function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">LinkedIn URL</label>
-              <input type="url" name="linkedinUrl" value={profile.linkedinUrl || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="https://linkedin.com/in/johndoe" />
+              <input type="url" name="linkedinUrl" value={profile.linkedinUrl || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="https://linkedin.com/in/johndoe" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">GitHub URL</label>
-              <input type="url" name="githubUrl" value={profile.githubUrl || ''} onChange={handleChange} className="input-field bg-white/5" placeholder="https://github.com/johndoe" />
+              <input type="url" name="githubUrl" value={profile.githubUrl || ''} onChange={handleChange} className="input-field px-3 bg-white/5" placeholder="https://github.com/johndoe" />
             </div>
           </div>
         </div>

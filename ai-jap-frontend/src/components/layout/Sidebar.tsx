@@ -17,7 +17,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-64 glass-panel border-r border-white/10 flex flex-col z-50">
       <div className="p-6">
         <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-          Antigravity AI
+          AI Job Application Platform
         </h1>
         <p className="text-xs text-muted-foreground mt-1">Career Automation Platform</p>
       </div>

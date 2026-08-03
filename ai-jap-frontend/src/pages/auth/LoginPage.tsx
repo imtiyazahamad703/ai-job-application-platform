@@ -19,7 +19,7 @@ export function LoginPage() {
     
     try {
       const res = await api.post('/auth/login', { email, password });
-      login(res.data.tokens.accessToken, res.data.user);
+      login(res.data.accessToken, res.data.user);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
@@ -29,7 +29,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-bg text-foreground relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground relative overflow-hidden">
       {/* Background gradients */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -56,7 +56,7 @@ export function LoginPage() {
               <input
                 type="email"
                 required
-                className="input-field pl-10 h-12 bg-white/5"
+                className="input-field pl-10 pr-3 h-12 bg-white/5 text-foreground"
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -71,7 +71,7 @@ export function LoginPage() {
               <input
                 type="password"
                 required
-                className="input-field pl-10 h-12 bg-white/5"
+                className="input-field pl-10 pr-3 h-12 bg-white/5 text-foreground"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
