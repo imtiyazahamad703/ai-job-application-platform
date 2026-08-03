@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { ResumePage } from './pages/resume/ResumePage';
 
+import { JobsPage } from './pages/jobs/JobsPage';
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
   
@@ -33,6 +35,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/resume" element={<ResumePage />} />
+        <Route path="/jobs" element={<JobsPage />} />
       </Route>
     </Routes>
   );
