@@ -9,6 +9,7 @@ import { Model, Types } from 'mongoose';
 import * as mammoth from 'mammoth';
 
 import { Resume, ResumeDocument } from './schemas/resume.schema';
+import { User, UserDocument } from '../authentication/schemas/user.schema';
 import { GoogleDriveService } from '../../integrations/google-drive/google-drive.service';
 
 // pdf-parse CJS import
@@ -32,6 +33,8 @@ export class ResumeService {
   constructor(
     @InjectModel(Resume.name)
     private readonly resumeModel: Model<ResumeDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
     private readonly driveService: GoogleDriveService,
   ) {}
 
@@ -49,8 +52,10 @@ export class ResumeService {
       throw new BadRequestException('File size exceeds the 5MB limit');
     }
 
+    const userDoc = await this.userModel.findById(userId).select('+googleRefreshToken').exec();
     const parsedText = await this.extractText(file.buffer, file.mimetype);
     const driveResult = await this.driveService.uploadFile(
+      userDoc?.googleRefreshToken,
       file.buffer,
       file.originalname,
       file.mimetype,
@@ -100,7 +105,8 @@ export class ResumeService {
 
   async deleteResume(userId: string, resumeId: string): Promise<void> {
     const resume = await this.getResume(userId, resumeId);
-    await this.driveService.deleteFile(resume.driveFileId);
+    const userDoc = await this.userModel.findById(userId).select('+googleRefreshToken').exec();
+    await this.driveService.deleteFile(userDoc?.googleRefreshToken, resume.driveFileId);
     await this.resumeModel.deleteOne({ _id: resume._id });
 
     if (resume.isDefault) {

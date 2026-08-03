@@ -128,4 +128,29 @@ export class AuthService {
     });
     return { accessToken, expiresIn: expiresIn ?? '15m' };
   }
+
+  async googleLogin(
+    profile: any,
+  ): Promise<{ user: UserDocument; tokens: AuthTokens; refreshToken: string }> {
+    let user = await this.userModel.findOne({ email: profile.email }).exec();
+
+    if (!user) {
+      // Create user without password
+      user = await this.userModel.create({
+        email: profile.email,
+        passwordHash: 'GOOGLE_OAUTH',
+        isEmailVerified: true,
+      });
+      this.logger.log(`New user registered via Google: ${user.email}`);
+    }
+
+    if (profile.refreshToken) {
+      user.googleRefreshToken = profile.refreshToken;
+      await user.save();
+    }
+
+    const tokens = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+    return { user, tokens, refreshToken };
+  }
 }

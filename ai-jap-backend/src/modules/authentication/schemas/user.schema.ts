@@ -23,6 +23,9 @@ export class User {
   @Prop({ select: false })
   refreshTokenHash?: string;
 
+  @Prop({ select: false })
+  googleRefreshToken?: string;
+
   @Prop({ default: false })
   isEmailVerified: boolean;
 

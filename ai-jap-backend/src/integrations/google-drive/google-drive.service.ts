@@ -20,37 +20,35 @@ export interface DriveUploadResult {
 @Injectable()
 export class GoogleDriveService {
   private readonly logger = new Logger(GoogleDriveService.name);
-  private drive: drive_v3.Drive;
-  private readonly folderId: string;
 
-  constructor(private readonly configService: ConfigService) {
-    // Service Account key file path
-    const keyFilePath = path.resolve(
-      process.cwd(),
-      'ai-job-platform-dev-4eca15ad6181.json',
+  constructor(private readonly configService: ConfigService) {}
+
+  private getDriveClient(refreshToken?: string): drive_v3.Drive {
+    if (!refreshToken) {
+      throw new InternalServerErrorException(
+        'Google Drive account not connected. Please sign in with Google.',
+      );
+    }
+    const oAuth2Client = new google.auth.OAuth2(
+      this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+      this.configService.get<string>('GOOGLE_REDIRECT_URI'),
     );
-
-    const auth = new google.auth.GoogleAuth({
-      keyFile: keyFilePath,
-      scopes: ['https://www.googleapis.com/auth/drive'],
-    });
-
-    this.drive = google.drive({ version: 'v3', auth });
-    this.folderId = this.configService.get<string>(
-      'GOOGLE_DRIVE_FOLDER_ID',
-      '',
-    );
+    oAuth2Client.setCredentials({ refresh_token: refreshToken });
+    return google.drive({ version: 'v3', auth: oAuth2Client });
   }
 
   /**
    * Upload a file buffer to Google Drive and make it publicly readable.
    */
   async uploadFile(
+    refreshToken: string | undefined,
     buffer: Buffer,
     originalFilename: string,
     mimeType: string,
   ): Promise<DriveUploadResult> {
     try {
+      const drive = this.getDriveClient(refreshToken);
       const stream = Readable.from(buffer);
       const timestamp = Date.now();
       const ext = path.extname(originalFilename);
@@ -58,12 +56,9 @@ export class GoogleDriveService {
       const fileName = `${baseName}_${timestamp}${ext}`;
 
       const requestBody: drive_v3.Schema$File = { name: fileName };
-      if (this.folderId) {
-        requestBody.parents = [this.folderId];
-      }
 
       // Upload the file
-      const uploadResponse = await this.drive.files.create({
+      const uploadResponse = await drive.files.create({
         requestBody,
         media: { mimeType, body: stream },
         fields: 'id, name, size, webViewLink, webContentLink',
@@ -72,7 +67,7 @@ export class GoogleDriveService {
       const fileId = uploadResponse.data.id!;
 
       // Make the file publicly readable (anyone with link)
-      await this.drive.permissions.create({
+      await drive.permissions.create({
         fileId,
         requestBody: { role: 'reader', type: 'anyone' },
       });
@@ -99,9 +94,10 @@ export class GoogleDriveService {
   /**
    * Delete a file from Google Drive.
    */
-  async deleteFile(fileId: string): Promise<void> {
+  async deleteFile(refreshToken: string | undefined, fileId: string): Promise<void> {
     try {
-      await this.drive.files.delete({ fileId });
+      const drive = this.getDriveClient(refreshToken);
+      await drive.files.delete({ fileId });
       this.logger.log(`Deleted from Drive: ${fileId}`);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -115,9 +111,10 @@ export class GoogleDriveService {
   /**
    * Get file metadata from Google Drive.
    */
-  async getFileMetadata(fileId: string): Promise<drive_v3.Schema$File> {
+  async getFileMetadata(refreshToken: string | undefined, fileId: string): Promise<drive_v3.Schema$File> {
     try {
-      const response = await this.drive.files.get({
+      const drive = this.getDriveClient(refreshToken);
+      const response = await drive.files.get({
         fileId,
         fields: 'id, name, size, webViewLink, webContentLink, mimeType',
       });

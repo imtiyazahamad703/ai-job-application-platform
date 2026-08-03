@@ -24,6 +24,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { UserDocument } from './schemas/user.schema';
 
 const REFRESH_COOKIE = 'refresh_token';
@@ -143,5 +144,28 @@ export class AuthController {
     await this.authService.logout(user._id.toString());
     res.clearCookie(REFRESH_COOKIE, { path: '/' });
     return { message: 'Logged out successfully' };
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Initiate Google OAuth flow' })
+  async googleAuth() {
+    // Initiates the Google OAuth flow
+  }
+
+  @Public()
+  @Get('google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  async googleAuthRedirect(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { tokens, refreshToken } = await this.authService.googleLogin(req.user);
+    res.cookie(REFRESH_COOKIE, refreshToken, getCookieOptions());
+    // Redirect back to frontend dashboard with token
+    // In production, we'd want to configure this origin properly
+    res.redirect(`http://localhost:5173/dashboard?token=${tokens.accessToken}`);
   }
 }
