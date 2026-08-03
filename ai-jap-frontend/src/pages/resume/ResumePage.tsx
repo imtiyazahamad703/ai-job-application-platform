@@ -23,7 +23,7 @@ export function ResumePage() {
   const fetchResumes = async () => {
     try {
       const res = await api.get('/resume');
-      setResumes(res.data);
+      setResumes(res.data.resumes);
     } catch (err) {
       console.error(err);
     } finally {
