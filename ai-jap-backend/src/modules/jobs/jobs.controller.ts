@@ -26,6 +26,17 @@ export class JobsController {
     return this.jobsService.createPersona(user._id.toString(), dto);
   }
 
+  @Post('personas/generate-from-resume/:resumeId')
+  @ApiOperation({ summary: 'Auto-generate Persona from a Resume' })
+  @ApiBody({ schema: { type: 'object', properties: { targetRole: { type: 'string', example: 'Java Backend' } } } })
+  async generatePersonaFromResume(
+    @CurrentUser() user: UserDocument, 
+    @Param('resumeId') resumeId: string,
+    @Body('targetRole') targetRole?: string
+  ) {
+    return this.jobsService.generatePersonaFromResume(user._id.toString(), resumeId, targetRole);
+  }
+
   @Put('personas/:id')
   @ApiOperation({ summary: 'Update Search Persona (Versioning)' })
   @ApiBody({ type: UpdateSearchPersonaDto })

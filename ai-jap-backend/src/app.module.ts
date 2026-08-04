@@ -20,6 +20,8 @@ import { PlaywrightModule } from './automation/playwright/playwright.module';
 import { PlatformsModule } from './automation/platforms/platforms.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { AiModule } from './ai/ai.module';
+import { ApplicationsModule } from './modules/applications/applications.module';
+import { AutomationModule } from './automation/automation.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { AiModule } from './ai/ai.module';
     ProfileModule,
     ResumeModule,
     JobsModule,
+    ApplicationsModule,
+    AutomationModule,
     PlaywrightModule,
     PlatformsModule,
     SchedulerModule,

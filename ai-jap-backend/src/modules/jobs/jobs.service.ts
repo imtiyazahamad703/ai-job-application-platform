@@ -9,6 +9,7 @@ import { ProfileService } from '../profile/profile.service';
 import { GeminiService } from '../../ai/gemini/gemini.service';
 
 import { PreFilterService } from './pre-filter.service';
+import { ResumeService } from '../resume/resume.service';
 
 @Injectable()
 export class JobsService {
@@ -21,7 +22,21 @@ export class JobsService {
     private readonly profileService: ProfileService,
     private readonly geminiService: GeminiService,
     private readonly preFilterService: PreFilterService,
+    private readonly resumeService: ResumeService,
   ) { }
+
+  async generatePersonaFromResume(userId: string, resumeId: string, targetRole?: string): Promise<any> {
+    const resume = await this.resumeService.getResume(userId, resumeId);
+    if (!resume.parsedText) {
+      throw new InternalServerErrorException('Resume has no parsed text available');
+    }
+    this.logger.log(`Generating persona from resume ${resumeId} using Gemini (Target Role: ${targetRole || 'None'})`);
+    const generatedData = await this.geminiService.generatePersonaFromText(resume.parsedText, targetRole);
+    
+    // Add linkedResumeId to the generated data so frontend can map it
+    generatedData.linkedResumeId = resumeId;
+    return generatedData;
+  }
 
   async getJobs(limit: number = 20, skip: number = 0, location?: string): Promise<{ jobs: Job[], totalCount: number }> {
     const query: any = {};

@@ -8,7 +8,9 @@ import { SearchPersona, SearchPersonaSchema } from './schemas/search-persona.sch
 import { SearchCache, SearchCacheSchema } from './schemas/search-cache.schema';
 import { PlatformsModule } from '../../automation/platforms/platforms.module';
 import { ProfileModule } from '../profile/profile.module';
+import { ResumeModule } from '../resume/resume.module';
 import { AiModule } from '../../ai/ai.module';
+import { ApplicationsModule } from '../applications/applications.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { AiModule } from '../../ai/ai.module';
     ]),
     PlatformsModule,
     ProfileModule,
+    ResumeModule,
     AiModule,
+    ApplicationsModule,
   ],
   controllers: [JobsController],
   providers: [JobsService, PreFilterService],
