@@ -208,9 +208,35 @@ export function JobsPage() {
 
               <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
                 <span className="text-xs text-muted-foreground">Found {new Date(job.createdAt).toLocaleDateString()}</span>
-                <a href={job.url} target="_blank" rel="noreferrer" className="bg-primary/20 hover:bg-primary/30 text-primary px-4 py-1.5 rounded-lg transition-colors flex items-center text-sm font-medium">
-                  Apply Now <ExternalLink className="w-4 h-4 ml-1.5" />
-                </a>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={async () => {
+                      try {
+                        // TODO: Add proper state loading per job id
+                        alert('Starting auto-application in the background... Watch your backend logs!');
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`http://localhost:3000/api/v1/automation/auto-apply/${job._id}`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (!res.ok) {
+                          const err = await res.json();
+                          alert(`Auto-apply failed: ${err.message}`);
+                        } else {
+                          alert('Auto-apply completed successfully!');
+                        }
+                      } catch (e) {
+                        alert('Failed to trigger auto-apply');
+                      }
+                    }}
+                    className="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 px-4 py-1.5 rounded-lg transition-colors flex items-center text-sm font-medium"
+                  >
+                    Auto Apply 🤖
+                  </button>
+                  <a href={job.url} target="_blank" rel="noreferrer" className="bg-primary/20 hover:bg-primary/30 text-primary px-4 py-1.5 rounded-lg transition-colors flex items-center text-sm font-medium">
+                    Manual Apply <ExternalLink className="w-4 h-4 ml-1.5" />
+                  </a>
+                </div>
               </div>
             </div>
           ))}
