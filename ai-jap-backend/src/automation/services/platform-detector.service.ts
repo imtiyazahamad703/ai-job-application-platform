@@ -5,7 +5,7 @@ export enum AtsPlatform {
   GREENHOUSE = 'GREENHOUSE',
   LEVER = 'LEVER',
   WORKDAY = 'WORKDAY',
-  UNKNOWN = 'UNKNOWN',
+  EXTERNAL_SITE = 'EXTERNAL_SITE',
 }
 
 @Injectable()
@@ -37,11 +37,10 @@ export class PlatformDetectorService {
       if (hostname.includes('myworkdayjobs.com')) {
         return AtsPlatform.WORKDAY;
       }
-
-      return AtsPlatform.UNKNOWN;
+      return AtsPlatform.EXTERNAL_SITE;
     } catch (error) {
       this.logger.error(`Failed to parse URL for platform detection: ${url}`, error);
-      return AtsPlatform.UNKNOWN;
+      return AtsPlatform.EXTERNAL_SITE;
     }
   }
 }

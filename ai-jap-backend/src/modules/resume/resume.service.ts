@@ -141,6 +141,29 @@ export class ResumeService {
     return resume;
   }
 
+  /**
+   * Downloads a resume to a temporary local file so Playwright can attach it.
+   * Returns the absolute path to the local file.
+   */
+  async downloadResumeLocally(userId: string, resumeId: string): Promise<string> {
+    const fs = require('fs/promises');
+    const path = require('path');
+    
+    const resume = await this.getResume(userId, resumeId);
+    const userDoc = await this.userModel.findById(userId).select('+googleRefreshToken').exec();
+    
+    const buffer = await this.driveService.downloadFile(userDoc?.googleRefreshToken, resume.driveFileId);
+    
+    const tmpDir = path.join(process.cwd(), '.tmp-resumes');
+    await fs.mkdir(tmpDir, { recursive: true });
+    
+    const filePath = path.join(tmpDir, `${resume._id}_${resume.originalFilename}`);
+    await fs.writeFile(filePath, buffer);
+    
+    this.logger.log(`Resume downloaded locally for upload: ${filePath}`);
+    return filePath;
+  }
+
   private async extractText(buffer: Buffer, mimeType: string): Promise<string> {
     try {
       if (mimeType === 'application/pdf') {

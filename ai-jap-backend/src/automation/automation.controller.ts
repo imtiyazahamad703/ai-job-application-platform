@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../modules/authentication/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserDocument } from '../modules/authentication/schemas/user.schema';
 import { LinkedinApplyService } from './platforms/linkedin/linkedin-apply.service';
+import { GenericApplyService } from './platforms/generic/generic-apply.service';
 import { PlatformDetectorService, AtsPlatform } from './services/platform-detector.service';
 import { JobsService } from '../modules/jobs/jobs.service';
 import { ApplicationsService } from '../modules/applications/applications.service';
@@ -21,6 +22,7 @@ import { SearchPersona, SearchPersonaDocument } from '../modules/jobs/schemas/se
 export class AutomationController {
   constructor(
     private readonly linkedinApplyService: LinkedinApplyService,
+    private readonly genericApplyService: GenericApplyService,
     private readonly platformDetectorService: PlatformDetectorService,
     private readonly applicationsService: ApplicationsService,
     private readonly profileService: ProfileService,
@@ -56,9 +58,6 @@ export class AutomationController {
 
     // 4. Detect Platform
     const platform = this.platformDetectorService.detectPlatform(job.url);
-    if (platform !== AtsPlatform.LINKEDIN_EASY_APPLY) {
-      throw new HttpException('Only LinkedIn Easy Apply is supported for MVP', HttpStatus.NOT_IMPLEMENTED);
-    }
 
     // 5. Create Initial Application Record
     const application = await this.applicationsService.createApplication({
@@ -66,7 +65,7 @@ export class AutomationController {
       jobId: job._id as any,
       personaId: persona._id as any,
       status: ApplicationStatus.APPLIED, // Will update to FAILED if it fails
-      platform: 'LinkedIn',
+      platform: platform === AtsPlatform.LINKEDIN_EASY_APPLY ? 'LinkedIn' : 'External',
       logs: ['Application started...']
     });
 
@@ -74,7 +73,12 @@ export class AutomationController {
     // Note: In a production app, this should be pushed to a queue (e.g. BullMQ) 
     // instead of awaiting synchronously, but for MVP local execution, this is fine.
     try {
-      const result = await this.linkedinApplyService.applyToJob(job.url, profile as any, persona);
+      let result;
+      if (platform === AtsPlatform.LINKEDIN_EASY_APPLY) {
+        result = await this.linkedinApplyService.applyToJob(job.url, profile as any, persona);
+      } else {
+        result = await this.genericApplyService.applyToJob(job.url, profile as any, persona);
+      }
       
       if (result.success) {
         // Update log and keep status APPLIED

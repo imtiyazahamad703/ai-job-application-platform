@@ -134,4 +134,23 @@ export class GoogleDriveService {
       );
     }
   }
+
+  /**
+   * Download a file from Google Drive and return its Buffer.
+   */
+  async downloadFile(refreshToken: string | undefined, fileId: string): Promise<Buffer> {
+    try {
+      const drive = this.getDriveClient(refreshToken);
+      const response = await drive.files.get(
+        { fileId, alt: 'media' },
+        { responseType: 'arraybuffer' }
+      );
+      this.logger.log(`Downloaded file from Drive: ${fileId}`);
+      return Buffer.from(response.data as any);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Google Drive download failed for ${fileId}: ${msg}`);
+      throw new InternalServerErrorException('Failed to download file from storage');
+    }
+  }
 }
