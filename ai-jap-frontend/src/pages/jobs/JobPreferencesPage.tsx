@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Loader2, Plus, Trash2, History } from 'lucide-react';
+import { Save, Loader2, Plus, Trash2, History, Sparkles, ChevronDown } from 'lucide-react';
 import { api } from '../../services/api.service';
 
 interface TechCategory {
@@ -56,6 +56,12 @@ export function JobPreferencesPage() {
   const [activePersona, setActivePersona] = useState<Partial<SearchPersona> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [resumes, setResumes] = useState<any[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState('');
+  const [showGenerateOptions, setShowGenerateOptions] = useState(false);
+
+  const [targetRole, setTargetRole] = useState('');
 
   const [inputs, setInputs] = useState({
     title: '',
@@ -68,7 +74,20 @@ export function JobPreferencesPage() {
 
   useEffect(() => {
     fetchPersonas();
+    fetchResumes();
   }, []);
+
+  const fetchResumes = async () => {
+    try {
+      const res = await api.get('/resume');
+      setResumes(res.data.resumes || []);
+      if (res.data.resumes?.length > 0) {
+        setSelectedResumeId(res.data.resumes[0]._id);
+      }
+    } catch (err) {
+      console.error('Failed to fetch resumes', err);
+    }
+  };
 
   const fetchPersonas = async () => {
     try {
@@ -83,6 +102,27 @@ export function JobPreferencesPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!selectedResumeId) return;
+    setGenerating(true);
+    try {
+      const res = await api.post(`/jobs/personas/generate-from-resume/${selectedResumeId}`, {
+        targetRole: targetRole || undefined
+      });
+      // The backend returns a full object, we merge it over the empty persona
+      setActivePersona({
+        ...emptyPersona,
+        ...res.data,
+      });
+      setShowGenerateOptions(false);
+    } catch (err) {
+      console.error('Failed to generate persona', err);
+      alert('Failed to generate persona from resume. Please ensure the resume is parsed correctly.');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -218,14 +258,75 @@ export function JobPreferencesPage() {
                 className="text-2xl font-bold bg-transparent border-b border-transparent hover:border-white/30 focus:border-primary outline-none px-2 py-1"
                 placeholder="Persona Name"
               />
-              <button 
-                onClick={handleSave} 
-                disabled={saving}
-                className="btn-primary flex items-center space-x-2"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>{saving ? 'Saving...' : (activePersona._id ? 'Save New Version' : 'Create')}</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowGenerateOptions(!showGenerateOptions)}
+                    className="btn-secondary flex items-center space-x-2 border-purple-500/30 text-purple-300 hover:bg-purple-500/10"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Auto-Generate</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  
+                  {showGenerateOptions && (
+                    <div className="absolute right-0 mt-2 w-72 glass-panel border border-white/10 rounded-xl p-4 z-50 shadow-xl">
+                      <p className="text-xs text-muted-foreground mb-1">Select Resume:</p>
+                      <select 
+                        value={selectedResumeId}
+                        onChange={e => setSelectedResumeId(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-lg text-sm p-2 mb-3 outline-none focus:border-primary"
+                      >
+                        <option value="" disabled>Select a resume...</option>
+                        {resumes.map(r => (
+                          <option key={r._id} value={r._id}>{r.label || r.originalFilename}</option>
+                        ))}
+                      </select>
+
+                      <p className="text-xs text-muted-foreground mb-1">Target Stack / Role (Optional):</p>
+                      <input 
+                        type="text"
+                        placeholder="e.g. Java Backend, MERN Stack"
+                        value={targetRole}
+                        onChange={e => setTargetRole(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-lg text-sm p-2 mb-4 outline-none focus:border-primary text-white placeholder-white/30"
+                      />
+
+                      <button 
+                        onClick={handleGenerate}
+                        disabled={generating || !selectedResumeId}
+                        className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-sm font-medium transition-colors flex justify-center items-center space-x-2 disabled:opacity-50"
+                      >
+                        {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        <span>{generating ? 'Generating...' : 'Extract Persona'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className="btn-primary flex items-center space-x-2"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{saving ? 'Saving...' : (activePersona._id ? 'Save New Version' : 'Create')}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* AI Role Summary */}
+            <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl">
+              <label className="text-sm font-medium text-primary block mb-2 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> AI Role Summary
+              </label>
+              <textarea
+                value={activePersona.aiRoleSummary || ''}
+                onChange={e => updateActive({ aiRoleSummary: e.target.value })}
+                placeholder="A brief summary of your expertise and domain..."
+                className="w-full bg-transparent border border-white/10 hover:border-white/30 focus:border-primary rounded-lg p-3 outline-none text-sm text-white/80 resize-none h-24"
+              />
+              <p className="text-xs text-muted-foreground mt-2">This summary is used by the AI to evaluate how well your profile aligns with job descriptions semantically.</p>
             </div>
 
             {/* Broad Search config */}
