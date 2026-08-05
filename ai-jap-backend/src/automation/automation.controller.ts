@@ -59,44 +59,16 @@ export class AutomationController {
     // 4. Detect Platform
     const platform = this.platformDetectorService.detectPlatform(job.url);
 
-    // 5. Create Initial Application Record
-    const application = await this.applicationsService.createApplication({
+    // 5. Create Initial Application Record as PENDING
+    await this.applicationsService.createApplication({
       userId: user._id as any,
       jobId: job._id as any,
       personaId: persona._id as any,
-      status: ApplicationStatus.APPLIED, // Will update to FAILED if it fails
+      status: ApplicationStatus.PENDING,
       platform: platform === AtsPlatform.LINKEDIN_EASY_APPLY ? 'LinkedIn' : 'External',
-      logs: ['Application started...']
+      logs: ['Application queued for background processing...']
     });
 
-    // 6. Execute Automation
-    // Note: In a production app, this should be pushed to a queue (e.g. BullMQ) 
-    // instead of awaiting synchronously, but for MVP local execution, this is fine.
-    try {
-      let result;
-      if (platform === AtsPlatform.LINKEDIN_EASY_APPLY) {
-        result = await this.linkedinApplyService.applyToJob(job.url, profile as any, persona);
-      } else {
-        result = await this.genericApplyService.applyToJob(job.url, profile as any, persona);
-      }
-      
-      if (result.success) {
-        // Update log and keep status APPLIED
-        application.logs.push(...result.logs);
-        await application.save();
-        return { message: 'Application successful', logs: result.logs };
-      } else {
-        // Mark as FAILED
-        application.status = ApplicationStatus.FAILED;
-        application.logs.push(...result.logs, 'Application failed during execution.');
-        await application.save();
-        throw new HttpException({ message: 'Application failed', logs: application.logs }, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    } catch (error) {
-      application.status = ApplicationStatus.FAILED;
-      application.logs.push(`System Error: ${error.message}`);
-      await application.save();
-      throw new HttpException('Automation process encountered a critical error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return { message: 'Application queued successfully' };
   }
 }

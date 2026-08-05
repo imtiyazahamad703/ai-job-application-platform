@@ -10,6 +10,6 @@ import { Application, ApplicationSchema } from './schemas/application.schema';
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],
-  exports: [ApplicationsService],
+  exports: [ApplicationsService, MongooseModule],
 })
 export class ApplicationsModule {}

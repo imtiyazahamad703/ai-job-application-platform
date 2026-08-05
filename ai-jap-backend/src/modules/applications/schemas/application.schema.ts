@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 export enum ApplicationStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
   APPLIED = 'APPLIED',
   FAILED = 'FAILED',
   INTERVIEWING = 'INTERVIEWING',

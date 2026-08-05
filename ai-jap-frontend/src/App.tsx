@@ -8,6 +8,7 @@ import { ProfilePage } from './pages/profile/ProfilePage';
 import { ResumePage } from './pages/resume/ResumePage';
 import { JobsPage } from './pages/jobs/JobsPage';
 import { JobPreferencesPage } from './pages/jobs/JobPreferencesPage';
+import ApplicationsPage from './pages/applications/ApplicationsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
@@ -37,6 +38,7 @@ function AppRoutes() {
         <Route path="/resume" element={<ResumePage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/job-preferences" element={<JobPreferencesPage />} />
+        <Route path="/applications" element={<ApplicationsPage />} />
       </Route>
     </Routes>
   );

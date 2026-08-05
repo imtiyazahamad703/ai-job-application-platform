@@ -13,6 +13,6 @@ import { AuthModule } from '../authentication/auth.module';
   ],
   controllers: [ProfileController],
   providers: [ProfileService],
-  exports: [ProfileService],
+  exports: [ProfileService, MongooseModule],
 })
 export class ProfileModule {}

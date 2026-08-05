@@ -156,7 +156,7 @@ This document is the **single source of truth** for development progress.
 
 ### PHASE 3 - BROWSER AUTOMATION (HIGHEST PRIORITY - MVP)
 **Goal:** Automatically open career site, fill form, upload resume, submit application.
-**Status:** DONE
+**Status:** IN PROGRESS
 
 | Task | Status | Notes |
 |------|--------|-------|
@@ -164,17 +164,17 @@ This document is the **single source of truth** for development progress.
 | DOM extraction service | DONE | Condenses HTML for AI |
 | Accessibility tree extraction | DONE | Merged with DOM extraction |
 | Screenshot capture | PENDING | Deferred to Phase 8 / Debugging |
-| ATS Platform Detection (Greenhouse, Lever, Workday, Ashby, etc.) | DONE | Basic URL check implemented |
-| ATS Platform Registry (plugin-based pattern) | DONE | Modularized per platform |
+| ATS Platform Detection (Greenhouse, Lever, Workday, Ashby, etc.) | DONE | Generic detection implemented |
+| ATS Platform Registry (plugin-based pattern) | DONE | LinkedIn & Generic handler implemented |
 | Workflow detection (current page stage) | DONE | Loop checking headers |
 | Dynamic form detection | DONE | Handled by Gemini |
 | Dynamic field mapping (AI semantic mapping) | DONE | Handled by Gemini Action Planner |
 | Action planning (JSON from LLM) | DONE | FormFillerService |
-| Execution engine (JSON to Playwright actions) | DONE | LinkedinApplyService loop |
+| Execution engine (JSON to Playwright actions) | DONE | LinkedIn & Generic sites handled |
 | Validation engine (post-action check) | DONE | Basic validation implemented |
-| Resume upload handler (dynamic) | PENDING | Skipped for MVP (assumes pre-uploaded) |
+| Resume upload handler (dynamic) | DONE | Downloads from Drive and attaches via Playwright |
 | Question answering engine | DONE | Handled via Profile/Persona injection |
-| Application submission | DONE | |
+| Application submission | DONE | Both LinkedIn Easy Apply & External Sites |
 | Retry mechanism | DONE | 15 loop limit |
 | Application tracking (save result to DB) | DONE | ApplicationsModule created |
 | Queue system (MongoDB-based queue for jobs) | PENDING | Currently synchronous |
@@ -512,13 +512,14 @@ src/
 
 ## NEXT IMMEDIATE TASK
 
-**Start Phase 4 - AI Resume Screener Migration:**
+**Finish Phase 3 (Queue) & Start Phase 4 (AI Resume Screener Migration):**
 
-1. Integrate the `Resume parsing pipeline` as a NestJS service.
-2. Develop the `ATS Score generation` using Gemini AI.
-3. Build logic for `Resume analysis` (skills, experience, strengths) and `Skill gap detection`.
-4. Create endpoints for `Cover letter generation` and `Resume rewrite suggestions`.
-5. Start building Frontend screens for Resume Analysis, ATS Score Display, and Cover Letter generation.
+1. **Background Job Queue (Phase 3 pending)**: Implement a Message Queue (e.g. BullMQ with Redis) so that the `autoApply` API does not run synchronously. It should return an immediate "Application Queued" response, while Playwright runs in the background.
+2. **Frontend Applications Tracking (Phase 3 pending)**: Build a simple UI to see the status of queued applications (Pending, Processing, Applied, Failed).
+3. **Phase 4 - AI Resume Screener Migration**:
+   - Integrate the `Resume parsing pipeline` as a NestJS service.
+   - Develop the `ATS Score generation` and `Skill gap detection` using Gemini AI.
+   - Create endpoints for `Cover letter generation` and `Resume rewrite suggestions`.
 
 ---
 

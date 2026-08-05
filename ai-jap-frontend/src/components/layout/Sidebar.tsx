@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, UserCircle, FileText, Search, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, UserCircle, FileText, Search, LogOut, Settings, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export function Sidebar() {
@@ -11,6 +11,7 @@ export function Sidebar() {
     { to: '/resume', icon: FileText, label: 'Resumes' },
     { to: '/jobs', icon: Search, label: 'Job Search' },
     { to: '/job-preferences', icon: Settings, label: 'Job Preferences' },
+    { to: '/applications', icon: Send, label: 'Applications' },
   ];
 
   return (
